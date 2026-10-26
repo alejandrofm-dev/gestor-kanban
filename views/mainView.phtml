@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda de Tareas</title>
+</head>
+
+<body>
+    <h1>Agenda de Tareas</h1>
+    <?php if (isset($_SESSION["user"])) { ?>
+        <p>
+            Bienvenido, <?= $_SESSION["user"]->getUsername(); ?>
+            <a href="index.php?c=user&logout">Cerrar sesión</a>
+        </p>
+        <button style="background-color: rgb(255, 216, 20); color: black; border: 1px solid black; border-radius: 5px;">
+            <a href="index.php?c=task&newTask" style="text-decoration: none; color: black;">Crear nueva tarea</a>
+        </button>
+        <p>
+            <?php
+            foreach ($_SESSION["user"]->getTasks() as $task) {
+                ?>
+            <p><span style="font-weight: bold; color:white; background-color: <?php if (strtolower($task->getPriority()) === 'high') {
+                echo 'red';
+            } elseif (strtolower($task->getPriority()) === 'medium') {
+                echo 'orange';
+            } else {
+                echo 'green';
+            } ?>;">
+                    <?php echo strtoupper($task->getPriority()); ?>
+                </span>
+            </p>
+            <p>
+                <?php echo $task->getTitle(); ?>
+                <button style="margin: 0 10px;">
+                    <a href="index.php?c=task&editTask=<?= $task->getId() ?>"
+                        style="text-decoration: none; color: black;">Editar</a>
+                </button>
+            </p>
+            <p>
+                Tags:
+                <?php foreach ($task->getTags() as $tag) {
+                    ?>
+                    <span style="font-weight: bold; color:<?= $tag->getColor() ?>;">#<?= $tag->getName() ?></span>
+                <?php } ?>
+            </p>
+            <p>
+                <?php echo $task->getDescription(); ?>
+            </p>
+            <p>
+                Fecha: <?php echo $task->getDueDate(); ?> |
+                Estado: <?php echo $task->getStatus(); ?>
+            </p>
+            <hr>
+            <?php
+            }
+            ?>
+        </p>
+
+    <?php } else { ?>
+        <h3>Inicia sesión o regístrate</h3>
+        <p><a href="index.php?c=user&login">Iniciar Sesión</a> <a href="index.php?c=user&register">Registrarse</a></p>
+    <?php } ?>
+</body>
+
+</html>

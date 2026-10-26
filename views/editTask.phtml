@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Tarea</title>
+</head>
+
+<body>
+    <h1>Editar Tarea</h1>
+    <form action="index.php?c=task&updateTask" method="post">
+        <input type="hidden" name="id" value="<?= $task->getId() ?>">
+        <label for="title">Título</label><br>
+        <input type="text" name="title" id="title" value="<?= $task->getTitle() ?>"><br>
+        <label for="description">Descripción</label><br>
+        <textarea name="description" id="description"><?= $task->getDescription() ?></textarea><br>
+        <label for="due_date">Fecha de vencimiento</label><br>
+        <input type="date" name="due_date" id="due_date" value="<?= $task->getDueDate() ?>"><br>
+        <label for="priority">Prioridad</label><br>
+        <select name="priority" id="priority">
+            <option value="high" <?= $task->getPriority() == 'high' ? 'selected' : '' ?>>Alta</option>
+            <option value="medium" <?= $task->getPriority() == 'medium' ? 'selected' : '' ?>>Media</option>
+            <option value="low" <?= $task->getPriority() == 'low' ? 'selected' : '' ?>>Baja</option>
+        </select><br>
+        <label for="status">Estado</label>
+        <select name="status" id="status">
+            <option value="pending" <?= $task->getStatus() == 'pending' ? 'selected' : '' ?>>Pendiente</option>
+            <option value="in_progress" <?= $task->getStatus() == 'in_progress' ? 'selected' : '' ?>>En progreso</option>
+            <option value="completed" <?= $task->getStatus() == 'completed' ? 'selected' : '' ?>>Completada</option>
+        </select>
+        <br>
+        <br>
+        <button style="background-color: rgb(255, 216, 20); color: black; border: 1px solid black; border-radius: 5px;"
+            type="submit">Actualizar Tarea</button>
+        <button
+            style="background-color: rgba(255, 166, 0, 1); color: white; border: 1px solid black; border-radius: 5px;"
+            type="reset">Reiniciar</button>
+    </form>
+    <br>
+    <button style="background-color: rgba(255, 0, 0, 1); color: white; border: 1px solid black; border-radius: 5px;">
+        <a href="index.php" style="text-decoration: none; color: white;">Cancelar</a>
+    </button>
+    <br>
+    <?php
+    if (isset($_GET['error'])) {
+        if ($_GET['error'] == 'camposvacios') {
+            echo "<p style='color: red;'>Rellena todos los campos</p>";
+        } else if ($_GET['error'] == 'erroralactualizar') {
+            echo "<p style='color: red;'>Error al actualizar la tarea</p>";
+        }
+    }
+    ?>
+</body>
+
+</html>

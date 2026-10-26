@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nueva Tarea</title>
+</head>
+
+<body>
+    <h1>Nueva Tarea</h1>
+    <p><a href="index.php">Volver al inicio</a></p>
+    <br>
+    <form action="index.php?c=task&addTask" method="POST">
+        <input type="text" name="title" placeholder="Título" required>
+        <input type="text" name="description" placeholder="Descripción">
+        <input type="date" name="due_date" placeholder="Fecha de vencimiento">
+        <select name="priority" id="priority">
+            <option value="" selected disabled>No seleccionado</option>
+            <option value="high">Alta</option>
+            <option value="medium">Media</option>
+            <option value="low">Baja</option>
+        </select>
+        <input type="submit" name="addTask" value="Crear">
+    </form>
+
+    <?php if (isset($_GET['error'])) { ?>
+        <?php if ($_GET['error'] == "camposvacios") { ?>
+            <p style="color: red;">Error: Campos vacíos</p>
+        <?php } else if ($_GET['error'] == "erroralinsertar") { ?>
+                <p style="color: red;">Error: Error al insertar</p>
+        <?php } ?>
+    <?php } ?>
+</body>
+
+</html>

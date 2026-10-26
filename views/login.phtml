@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <h1>Iniciar Sesión</h1>
+    <p><a href="index.php">Volver al inicio</a></p>
+    <br>
+    <form action="index.php?c=user&enter" method="POST">
+        <input type="text" name="username" placeholder="Nombre de usuario"><br>
+        <input type="password" name="password" placeholder="Contraseña"><br>
+        <input type="submit" name="enter" value="Iniciar Sesión">
+    </form>
+    <br>
+    <p>¿No tienes una cuenta? <a href="index.php?c=user&register">Regístrate</a></p>
+
+    <?php if (isset($_GET['error'])) { ?>
+        <p style="color: red;">Usuario o contraseña incorrectos</p>
+    <?php } ?>
+</body>
+
+</html>
