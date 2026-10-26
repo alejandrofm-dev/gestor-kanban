@@ -11,16 +11,54 @@
     <h1>Nueva Tarea</h1>
     <p><a href="index.php">Volver al inicio</a></p>
     <br>
+    <?php
+    $title = $title ?? '';
+    $description = $description ?? '';
+    $due_date = $due_date ?? '';
+    $priority = $priority ?? '';
+    $selectedTags = $selectedTags ?? [];
+    ?>
     <form action="index.php?c=task&addTask" method="POST">
-        <input type="text" name="title" placeholder="Título" required>
-        <input type="text" name="description" placeholder="Descripción">
-        <input type="date" name="due_date" placeholder="Fecha de vencimiento">
+        <input type="text" name="title" placeholder="Título" value="<?= htmlspecialchars($title) ?>" required>
+        <input type="text" name="description" placeholder="Descripción" value="<?= htmlspecialchars($description) ?>">
+        <input type="date" name="due_date" placeholder="Fecha de vencimiento" value="<?= htmlspecialchars($due_date) ?>">
         <select name="priority" id="priority">
-            <option value="" selected disabled>No seleccionado</option>
-            <option value="high">Alta</option>
-            <option value="medium">Media</option>
-            <option value="low">Baja</option>
+            <option value="" <?= empty($priority) ? 'selected' : '' ?> disabled>No seleccionado</option>
+            <option value="high" <?= $priority === 'high' ? 'selected' : '' ?>>Alta</option>
+            <option value="medium" <?= $priority === 'medium' ? 'selected' : '' ?>>Media</option>
+            <option value="low" <?= $priority === 'low' ? 'selected' : '' ?>>Baja</option>
         </select>
+
+        <div style="margin: 15px 0;">
+            <label for="tags">Tags:</label><br>
+            <div style="display: flex; gap: 8px; align-items: center; margin-top: 5px;">
+                <select name="selected_tag" id="tags">
+                    <option value="" selected disabled>Seleccionar tag...</option>
+                    <?php foreach (TagRepository::getAllTags() as $tag) { ?>
+                        <option value="<?php echo $tag->getId(); ?>">
+                            <?php echo htmlspecialchars($tag->getName()); ?>
+                        </option>
+                    <?php } ?>
+                </select>
+                <button type="submit" name="addTag" formnovalidate>Añadir Tag</button>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center; margin-top: 8px;">
+                <input type="text" name="new_tag_name" placeholder="Nueva etiqueta...">
+                <input type="color" name="new_tag_color" value="#6c757d" title="Color de la etiqueta">
+                <button type="submit" name="createTag" formnovalidate>Crear y añadir Tag</button>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">
+                <?php foreach ($selectedTags as $tag) { ?>
+                    <span style="display: inline-flex; align-items: center; gap: 6px; background-color: #f1f1f1; border: 1px solid #ccc; border-radius: 12px; padding: 4px 8px; font-size: 14px;">
+                        <span style="font-weight: bold; color: <?php echo htmlspecialchars($tag->getColor()); ?>;">#<?php echo htmlspecialchars($tag->getName()); ?></span>
+                        <input type="hidden" name="tags[]" value="<?php echo $tag->getId(); ?>">
+                        <button type="submit" name="removeTag" value="<?php echo $tag->getId(); ?>" formnovalidate style="background: none; border: none; color: red; font-weight: bold; cursor: pointer; padding: 0 2px; font-size: 14px; line-height: 1;" title="Quitar tag">X</button>
+                    </span>
+                <?php } ?>
+            </div>
+            <p><small style="color: gray;">Puedes añadir varias tags. Pulsa la 'X' para quitar las que no desees.</small></p>
+        </div>
+
         <input type="submit" name="addTask" value="Crear">
     </form>
 

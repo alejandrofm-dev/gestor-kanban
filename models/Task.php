@@ -48,4 +48,8 @@ class Task
     {
         return $this->tags;
     }
+    public function setTags(array $tags): void
+    {
+        $this->tags = $tags;
+    }
 }

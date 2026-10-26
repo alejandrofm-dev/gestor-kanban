@@ -30,6 +30,38 @@
             <option value="completed" <?= $task->getStatus() == 'completed' ? 'selected' : '' ?>>Completada</option>
         </select>
         <br>
+        <div style="margin: 15px 0;">
+            <label for="tags">Tags:</label><br>
+            <div style="display: flex; gap: 8px; align-items: center; margin-top: 5px;">
+                <select name="selected_tag" id="tags">
+                    <option value="" selected disabled>Seleccionar tag...</option>
+                    <?php foreach (TagRepository::getAllTags() as $tag) { ?>
+                        <option value="<?php echo $tag->getId(); ?>">
+                            <?php echo htmlspecialchars($tag->getName()); ?>
+                        </option>
+                    <?php } ?>
+                </select>
+                <button type="submit" name="addTag" formnovalidate>Añadir Tag</button>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center; margin-top: 8px;">
+                <input type="text" name="new_tag_name" placeholder="Nueva etiqueta...">
+                <input type="color" name="new_tag_color" value="#6c757d" title="Color de la etiqueta">
+                <button type="submit" name="createTag" formnovalidate>Crear y añadir Tag</button>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">
+                <?php
+                $currentTags = isset($selectedTags) ? $selectedTags : $task->getTags();
+                foreach ($currentTags as $tag) {
+                ?>
+                    <span style="display: inline-flex; align-items: center; gap: 6px; background-color: #f1f1f1; border: 1px solid #ccc; border-radius: 12px; padding: 4px 8px; font-size: 14px;">
+                        <span style="font-weight: bold; color: <?= htmlspecialchars($tag->getColor()) ?>;">#<?= htmlspecialchars($tag->getName()) ?></span>
+                        <input type="hidden" name="tags[]" value="<?= $tag->getId() ?>">
+                        <button type="submit" name="removeTag" value="<?= $tag->getId() ?>" formnovalidate style="background: none; border: none; color: red; font-weight: bold; cursor: pointer; padding: 0 2px; font-size: 14px; line-height: 1;" title="Quitar etiqueta">X</button>
+                    </span>
+                <?php } ?>
+            </div>
+            <p><small style="color: gray;">Puedes añadir varias tags o quitarlas pulsando en la 'X'.</small></p>
+        </div>
         <br>
         <button style="background-color: rgb(255, 216, 20); color: black; border: 1px solid black; border-radius: 5px;"
             type="submit">Actualizar Tarea</button>
