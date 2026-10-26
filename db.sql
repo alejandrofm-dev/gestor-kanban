@@ -42,10 +42,21 @@ CREATE TABLE IF NOT EXISTS task_tags(
     FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
 );
 
+-- Tabla intermedia para compartir tareas entre usuarios
+CREATE TABLE IF NOT EXISTS shared_tasks (
+    task_id INT NOT NULL,
+    user_id INT NOT NULL,
+    permission ENUM('read', 'write') DEFAULT 'read', -- 'read': solo ver, 'write': editar
+    shared_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (task_id, user_id),
+    FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 -- Inserción datos iniciales para facilitar las pruebas
 INSERT INTO users (username, email, password, rol) VALUES 
-('admin', 'admin@gmail.com', '21232f297a57a5a743894a0e4a801fc3', 'admin'),
-('alex', 'alex@gmail.com', '534b44a19bf18d20b71ecc4eb77c572f', 'user');
+('admin', 'admin@gmail.com', '21232f297a57a5a743894a0e4a801fc3', 'admin'), -- contraseña: admin
+('alex', 'alex@gmail.com', '534b44a19bf18d20b71ecc4eb77c572f', 'user'); -- contraseña: alex
 
 INSERT INTO tasks (title, description, due_date, priority, status, user_id) VALUES 
 ('Tarea 1', 'Tarea 1 descripcion', '2026-12-31', 'high', 'pending', 1),
@@ -64,3 +75,7 @@ INSERT INTO task_tags (task_id, tag_id) VALUES
 (1, 2), -- Tarea 1 -> Trabajo
 (2, 2), -- Tarea 2 -> Trabajo
 (3, 3); -- Task 3  -> Personal
+
+-- Inserción de prueba: El usuario 1 (admin) comparte la Tarea 1 con el usuario 2 (alex)
+INSERT INTO shared_tasks (task_id, user_id, permission) VALUES 
+(1, 2, 'write');

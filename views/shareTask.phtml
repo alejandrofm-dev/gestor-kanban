@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compartir tarea</title>
+    <style>
+        .container {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .column {
+            flex: 1;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+        }
+
+        .badge {
+            font-weight: bold;
+            color: white;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .badge-read {
+            background-color: #17a2b8;
+        }
+
+        .badge-write {
+            background-color: #28a745;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Compartir tarea: <?= htmlspecialchars($task->getTitle()) ?></h2>
+
+    <div class="container">
+        <!-- COLUMNA IZQUIERDA: Colaboradores actuales de la tarea con sus permisos -->
+        <div class="column">
+            <h3>Colaboradores de la tarea</h3>
+            <?php
+            $collabs = isset($collaborators) ? $collaborators : TaskRepository::getCollaboratorsByTaskId($task->getId());
+            if (!empty($collabs)) {
+                foreach ($collabs as $collab) { ?>
+                    <div class="user-item">
+                        <div>
+                            <strong><?= htmlspecialchars($collab['username']) ?></strong>
+                            <span style="color: #666; font-size: 13px;">(<?= htmlspecialchars($collab['email']) ?>)</span>
+                            <br>
+                            <span style="font-size: 13px;">Permiso: </span>
+                            <span class="badge <?= $collab['permission'] === 'write' ? 'badge-write' : 'badge-read' ?>">
+                                <?= $collab['permission'] === 'write' ? 'Escritura (write)' : 'Lectura (read)' ?>
+                            </span>
+                        </div>
+                        <div>
+                            <form action="index.php?c=task&shareTask=<?= $task->getId() ?>" method="POST" style="margin: 0;" onsubmit="return confirm('¿Quitar este colaborador de la tarea?');">
+                                <input type="hidden" name="user_id" value="<?= $collab['id'] ?>">
+                                <button type="submit" name="removeCollaborator" style="background-color: #dc3545; color: white; border: 1px solid #c82333; border-radius: 4px; padding: 4px 8px; cursor: pointer;">
+                                    Quitar
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                <?php }
+            } else { ?>
+                <p style="color: #666;">No hay colaboradores asignados a esta tarea.</p>
+            <?php } ?>
+        </div>
+
+        <!-- COLUMNA DERECHA: Todos los usuarios existentes para añadirlos y elegir permiso -->
+        <div class="column">
+            <h3>Usuarios existentes</h3>
+            <p style="color: #666; font-size: 14px; margin-top: -5px;">
+                Selecciona el permiso y pulsa añadir para compartir la tarea:
+            </p>
+            <?php
+            $users = isset($allUsers) ? $allUsers : UserRepository::getAllUsers();
+
+            // Mapa para saber si un usuario ya es colaborador y qué permiso tiene
+            $collabMap = [];
+            foreach ($collabs as $c) {
+                $collabMap[(int)$c['id']] = $c['permission'];
+            }
+
+            if (!empty($users)) {
+                foreach ($users as $user) {
+                    $userId = $user->getId();
+                    $isCollab = isset($collabMap[$userId]);
+                    $currentPermission = $isCollab ? $collabMap[$userId] : 'read';
+                    $isCurrentLoggedUser = isset($_SESSION['user']) && $_SESSION['user']->getId() === $userId;
+                    ?>
+                    <div class="user-item">
+                        <div>
+                            <strong><?= htmlspecialchars($user->getUsername()) ?></strong>
+                            <span style="color: #666; font-size: 13px;">(<?= htmlspecialchars($user->getEmail()) ?>)</span>
+                            <?php if ($isCurrentLoggedUser) { ?>
+                                <span style="font-size: 12px; color: #ffaa00; font-weight: bold;">(Tú)</span>
+                            <?php } ?>
+                            <?php if ($isCollab) { ?>
+                                <span style="font-size: 12px; color: #28a745; font-weight: bold;">(Colaborador actual)</span>
+                            <?php } ?>
+                        </div>
+                        <form action="index.php?c=task&shareTask=<?= $task->getId() ?>" method="POST" style="display: flex; gap: 8px; align-items: center; margin: 0;">
+                            <input type="hidden" name="user_id" value="<?= $userId ?>">
+                            <select name="permission" style="padding: 4px 8px; border-radius: 4px; border: 1px solid #ccc;">
+                                <option value="read" <?= $currentPermission === 'read' ? 'selected' : '' ?>>Lectura</option>
+                                <option value="write" <?= $currentPermission === 'write' ? 'selected' : '' ?>>Escritura</option>
+                            </select>
+                            <button type="submit" name="addCollaborator" style="background-color: <?= $isCollab ? '#28a745' : '#007bff' ?>; color: white; border: none; border-radius: 4px; padding: 5px 12px; cursor: pointer;">
+                                <?= $isCollab ? 'Actualizar' : 'Añadir' ?>
+                            </button>
+                        </form>
+                    </div>
+                <?php }
+            } else { ?>
+                <p style="color: #666;">No hay usuarios registrados en el sistema.</p>
+            <?php } ?>
+        </div>
+    </div>
+
+    <br>
+    <button style="background-color: rgba(255, 0, 0, 1); color: white; border: 1px solid black; border-radius: 5px;">
+        <a href="index.php" style="text-decoration: none; color: white;">Volver / Cancelar</a>
+    </button>
+</body>
+
+</html>

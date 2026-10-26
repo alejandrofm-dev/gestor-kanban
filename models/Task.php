@@ -7,9 +7,10 @@ class Task
     private ?string $dueDate;
     private string $priority;
     private string $status;
+    private ?string $permission;
     private array $tags = [];
 
-    public function __construct(int $id, string $title, ?string $description, ?string $dueDate, string $priority, string $status)
+    public function __construct(int $id, string $title, ?string $description, ?string $dueDate, string $priority, string $status, ?string $permission)
     {
         $this->id = $id;
         $this->title = $title;
@@ -17,6 +18,9 @@ class Task
         $this->dueDate = $dueDate;
         $this->priority = $priority;
         $this->status = $status;
+        if ($permission) {
+            $this->permission = $permission;
+        }
         $this->tags = TagRepository::getTagsByTaskId($id);
     }
 
@@ -48,8 +52,16 @@ class Task
     {
         return $this->tags;
     }
+    public function getPermission(): ?string
+    {
+        return $this->permission;
+    }
     public function setTags(array $tags): void
     {
         $this->tags = $tags;
+    }
+    public function getCollaborators(): array
+    {
+        return TaskRepository::getCollaboratorsByTaskId($this->id);
     }
 }

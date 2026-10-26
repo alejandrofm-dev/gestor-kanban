@@ -129,7 +129,8 @@ if (isset($_GET['updateTask'])) {
             $_POST['description'] ?? '',
             !empty($_POST['due_date']) ? $_POST['due_date'] : null,
             $_POST['priority'] ?? 'medium',
-            $_POST['status'] ?? 'pending'
+            $_POST['status'] ?? 'pending',
+            null
         );
         $task->setTags($selectedTags);
 
@@ -166,4 +167,50 @@ if (isset($_GET['updateTask'])) {
         header("Location: index.php?c=task&editTask=" . $taskId . "&error=camposvacios");
         exit();
     }
+}
+
+// Ver y compartir una tarea
+if (isset($_GET['shareTask'])) {
+    $taskId = (int) $_GET['shareTask'];
+
+    // Procesar añadir o actualizar colaborador
+    if (isset($_POST['addCollaborator']) || isset($_POST['shareUser'])) {
+        $userId = (int) ($_POST['user_id'] ?? 0);
+        $permission = in_array($_POST['permission'] ?? '', ['read', 'write']) ? $_POST['permission'] : 'read';
+
+        if ($taskId > 0 && $userId > 0) {
+            TaskRepository::shareTask($taskId, $userId, $permission);
+        }
+        header("Location: index.php?c=task&shareTask=" . $taskId);
+        exit();
+    }
+
+    // Procesar quitar colaborador (por POST o por GET)
+    if (isset($_POST['removeCollaborator']) || isset($_POST['unshareUser'])) {
+        $userId = (int) ($_POST['user_id'] ?? 0);
+        if ($taskId > 0 && $userId > 0) {
+            TaskRepository::unshareTask($taskId, $userId);
+        }
+        header("Location: index.php?c=task&shareTask=" . $taskId);
+        exit();
+    }
+
+    if (isset($_GET['removeCollaborator'])) {
+        $userId = (int) $_GET['removeCollaborator'];
+        if ($taskId > 0 && $userId > 0) {
+            TaskRepository::unshareTask($taskId, $userId);
+        }
+        header("Location: index.php?c=task&shareTask=" . $taskId);
+        exit();
+    }
+
+    $task = TaskRepository::getTaskById($taskId);
+    if ($task) {
+        $collaborators = TaskRepository::getCollaboratorsByTaskId($taskId);
+        $allUsers = UserRepository::getAllUsers();
+        require_once "views/shareTask.phtml";
+        exit();
+    }
+    header("Location: index.php?c=task&shareTask&error=tareaNoEncontrada");
+    exit();
 }

@@ -1,10 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agenda de Tareas</title>
+    <style>
+        .container {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .column {
+            flex: 1;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+    </style>
 </head>
 
 <body>
@@ -17,46 +32,99 @@
         <button style="background-color: rgb(255, 216, 20); color: black; border: 1px solid black; border-radius: 5px;">
             <a href="index.php?c=task&newTask" style="text-decoration: none; color: black;">Crear nueva tarea</a>
         </button>
-        <p>
-            <?php
-            foreach ($_SESSION["user"]->getTasks() as $task) {
-                ?>
-            <p><span style="font-weight: bold; color:white; background-color: <?php if (strtolower($task->getPriority()) === 'high') {
-                echo 'red';
-            } elseif (strtolower($task->getPriority()) === 'medium') {
-                echo 'orange';
-            } else {
-                echo 'green';
-            } ?>;">
-                    <?php echo strtoupper($task->getPriority()); ?>
-                </span>
-            </p>
-            <p>
-                <?php echo $task->getTitle(); ?>
-                <button style="margin: 0 10px;">
-                    <a href="index.php?c=task&editTask=<?= $task->getId() ?>"
-                        style="text-decoration: none; color: black;">Editar</a>
-                </button>
-            </p>
-            <p>
-                Tags:
-                <?php foreach ($task->getTags() as $tag) {
-                    ?>
-                    <span style="font-weight: bold; color:<?= $tag->getColor() ?>;">#<?= $tag->getName() ?></span>
+
+        <div class="container">
+            <!-- COLUMNA IZQUIERDA: Mis Tareas -->
+            <div class="column">
+                <h2>Mis Tareas</h2>
+                <?php foreach ($_SESSION["user"]->getTasks() as $task) { ?>
+                    <p>
+                        <span style="font-weight: bold; color:white; padding: 2px 5px; border-radius: 3px; background-color: <?php
+                        if (strtolower($task->getPriority()) === 'high')
+                            echo 'red';
+                        elseif (strtolower($task->getPriority()) === 'medium')
+                            echo 'orange';
+                        else
+                            echo 'green';
+                        ?>;">
+                            <?= strtoupper($task->getPriority()); ?>
+                        </span>
+                    </p>
+                    <p>
+                        <strong><?= $task->getTitle(); ?></strong>
+                        <button style="margin: 0 10px;">
+                            <a href="index.php?c=task&editTask=<?= $task->getId() ?>"
+                                style="text-decoration: none; color: black;">Editar</a>
+                        </button>
+                        <button style="background-color: #ffaa00; color: black; border: 1px solid black; border-radius: 5px;">
+                            <a href="index.php?c=task&shareTask=<?= $task->getId() ?>"
+                                style="text-decoration: none; color: black;">Compartir Tarea</a>
+                        </button>
+                    </p>
+                    <p>
+                        Tags:
+                        <?php foreach ($task->getTags() as $tag) { ?>
+                            <span style="font-weight: bold; color:<?= $tag->getColor() ?>;">#<?= $tag->getName() ?></span>
+                        <?php } ?>
+                    </p>
+                    <p><?= $task->getDescription(); ?></p>
+                    <p>
+                        Fecha: <?= $task->getDueDate(); ?> |
+                        Estado: <?= $task->getStatus(); ?>
+                    </p>
+                    <hr>
                 <?php } ?>
-            </p>
-            <p>
-                <?php echo $task->getDescription(); ?>
-            </p>
-            <p>
-                Fecha: <?php echo $task->getDueDate(); ?> |
-                Estado: <?php echo $task->getStatus(); ?>
-            </p>
-            <hr>
-            <?php
-            }
-            ?>
-        </p>
+            </div>
+
+            <!-- COLUMNA DERECHA: Tareas Compartidas Conmigo -->
+            <div class="column">
+                <h2>Tareas Compartidas Conmigo</h2>
+                <?php
+                // Asumiendo que las tareas compartidas están cargadas en el usuario (ej: getSharedTasks())
+                $sharedTasks = $_SESSION["user"]->getSharedTasks();
+
+                if (!empty($sharedTasks)) {
+                    foreach ($sharedTasks as $sharedTask) { ?>
+                        <p>
+                            <span style="font-weight: bold; color:white; padding: 2px 5px; border-radius: 3px; background-color: <?php
+                            if (strtolower($sharedTask->getPriority()) === 'high')
+                                echo 'red';
+                            elseif (strtolower($sharedTask->getPriority()) === 'medium')
+                                echo 'orange';
+                            else
+                                echo 'green';
+                            ?>;">
+                                <?= strtoupper($sharedTask->getPriority()); ?>
+                            </span>
+                        </p>
+                        <p>
+                            <strong><?= $sharedTask->getTitle(); ?></strong>
+                            <?php if ($sharedTask->getPermission() === 'write') { ?>
+                                <button style="margin: 0 10px;">
+                                    <a href="index.php?c=task&editTask=<?= $sharedTask->getId() ?>"
+                                        style="text-decoration: none; color: black;">Editar</a>
+                                </button>
+                            <?php } ?>
+                        </p>
+                        <p>
+                            Tags:
+                            <?php foreach ($sharedTask->getTags() as $tag) { ?>
+                                <span style="font-weight: bold; color:<?= $tag->getColor() ?>;">#<?= $tag->getName() ?></span>
+                            <?php } ?>
+                        </p>
+                        <p><?= $sharedTask->getDescription(); ?></p>
+                        <p>
+                            Fecha: <?= $sharedTask->getDueDate(); ?> |
+                            Estado: <?= $sharedTask->getStatus(); ?> |
+                            Permiso: <?= $sharedTask->getPermission(); ?>
+                        </p>
+                        <hr>
+                    <?php }
+                } else { ?>
+                    <p>No tienes tareas compartidas por otros usuarios.</p>
+                <?php } ?>
+            </div>
+        </div>
 
     <?php } else { ?>
         <h3>Inicia sesión o regístrate</h3>
